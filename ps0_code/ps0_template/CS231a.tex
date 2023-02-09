@@ -1,0 +1,108 @@
+% The document class options
+\documentclass[11pt,oneside,notitlepage]{article}
+
+% Packages
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{subfig}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{enumerate}
+\usepackage[shortlabels]{enumitem}
+\hypersetup{colorlinks=true}
+
+\usepackage{color}
+\usepackage{minted}
+
+\usemintedstyle{pastie}
+
+% Preamble (style parameters, etc)
+
+\setlength{\paperwidth}{8.5in}
+\setlength{\paperheight}{11in}
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{9.5in}
+
+\setlength{\topmargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\oddsidemargin}{0in}
+
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+
+% Command to display the header
+\newcommand{\HandoutHeader}[1]{
+\noindent{\large{\textbf{CS231A: Computer Vision, From 3D Reconstruction to Recognition}} \hfill Handout {#1}} \rule[1.0mm]{6.5in}{1mm} {\Large (Winter 2023)}
+\newline\newline }
+
+\newcommand{\HomeworkHeader}[2]{
+\noindent{\newline\newline\newline\large{\textbf{CS231A: Computer Vision, From 3D Reconstruction to Recognition}} \hfill Homework \#{#1}} \rule[1.0mm]{6.5in}{1mm}
+\\
+{\Large (Winter 2023)} \hfill {\large Due: \textbf{#2}}\newline\newline }
+
+\newcommand{\HomeworkSolutionsHeader}[2]{
+\noindent{\newline\newline\newline\Large{\textbf{CS231A: Computer Vision, From 3D Reconstruction to Recognition}} \hfill Homework \#{#1} Solution} \rule[1.0mm]{6.5in}{1mm} {\Large (Winter 2023)}\newline\newline }
+
+\newcommand{\MidtermHeader}[1]{
+\noindent{\Large{\bfseries CS231A: Computer Vision, From 3D Reconstruction to Recognition}}\newline
+\rule[1.0mm]{6.5in}{1mm}
+{\Large (Winter 2023)} \newline\newline\newline
+{\Large{\bfseries Midterm}} \hfill {\large Date: \textbf{#1}}\newline\newline\newline
+}
+
+\newcommand{\MidtermSolutionsHeader}[1]{
+\newline
+{\Large{\bfseries Midterm Solutions}} \hfill {\large Date: \textbf{#1}}\newline\newline\newline
+}
+
+\newcommand{\FinalHeader}[1]{
+\noindent{\Large{\bfseries CS231A: Computer Vision, From 3D Reconstruction to Recognition}}\newline
+\rule[1.0mm]{6.5in}{1mm}
+{\Large (Winter 2023)} \newline\newline\newline
+{\Large{\bfseries Final}} \hfill {\large Date: \textbf{#1}}\newline\newline\newline
+}
+
+\newcommand{\FinalSolutionsHeader}[1]{
+\newline
+{\Large{\bfseries Final Solutions}} \hfill {\large Date: \textbf{#1}}\newline\newline\newline
+}
+
+% Helper commands
+
+\newcommand{\q}{\ensuremath{\V{}{q}}}
+\newcommand{\qdot}{\ensuremath{\V{}{\dot{q}}}}
+\newcommand{\qddot}{\ensuremath{\V{}{\ddot{q}}}}
+%\newcommand{\p}[2]{\ensuremath{{^{#1}{\bf P}}
+\newcommand{\F}[1]{\ensuremath{\{#1\}}}
+\newcommand{\R}[2]{\ensuremath{^{#1}_{#2}R}}
+\newcommand{\T}[2]{\ensuremath{^{#1}_{#2}T}}
+\newcommand{\U}[2]{\ensuremath{\hat{#1}_{#2}}}
+\newcommand{\V}[2]{\ensuremath{^{#1}{\bf #2}}}
+\newcommand{\degs}{\ensuremath{^\circ}}
+\newcommand{\inv}{\ensuremath{^{-1}}}
+\newcommand{\Col}[1]{\ensuremath{\begin{matrix}{r} #1 \end{matrix}}}
+\newcommand{\Row}[1]{\ensuremath{\begin{matrix}{rrr}#1 \end{matrix}}}
+\newcommand{\mat}[1]{\ensuremath{\begin{matrix}{rrr} #1 \end{matrix}}}
+\newcommand{\cross}{\ensuremath{\times}}
+\newcommand{\quant}[1]{\left({#1}\right)}
+\newcommand{\abs}[1]{|{#1}|}
+\newcommand{\pderiv}[2]{\frac{\partial #1}{\partial #2}}
+
+\newcommand{\argmax}{\operatornamewithlimits{argmax}}
+\newcommand{\maximize}{\operatornamewithlimits{maximize}}
+\newcommand{\minimize}{\operatornamewithlimits{minimize}}
+
+% Use alphabets for enumerating subsections.
+\renewcommand{\thesubsection}{\thesection.\alph{subsection}}
+\renewcommand{\thesubsubsection}{\thesubsection.\roman{subsubsection}}
+% No new lines after subsection.
+\titleformat{\subsection}[runin] {\normalfont\large\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}[runin] {\normalfont\large\bfseries}{\thesubsubsection}{1em}{}
+
+\renewcommand{\theenumi}{\alph{enumi}}
+
+\newif\ifsolution
+\newif\ifgrading
