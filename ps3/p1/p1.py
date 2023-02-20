@@ -41,8 +41,36 @@ side-length. The final "voxels" output should be a ndarray where every row is
 the location of a voxel in 3D space.
 '''
 def form_initial_voxels(xlim, ylim, zlim, num_voxels):
-    # TODO: Implement this method!
-    raise Exception('Not Implemented Error')
+    
+    # Compute the lengths of the voxel grid
+    x_len = xlim[1] - xlim[0]
+    y_len = ylim[1] - ylim[0]
+    z_len = zlim[1] - zlim[0]
+
+    # Volume of each voxel
+    grid_vol = x_len * y_len * z_len
+    vox_vol = grid_vol / num_voxels
+    
+    # Length of each voxel
+    voxel_size = np.cbrt(vox_vol)
+    
+    # Get number of voxels for each dimension in 3D
+    num_x_voxels = int(np.round(x_len / voxel_size))
+    num_y_voxels = int(np.round(y_len / voxel_size))
+    num_z_voxels = int(np.round(z_len / voxel_size))
+    
+    # Evenly space voxels in each dimension
+    x_voxels = np.linspace(xlim[0] + voxel_size/2, xlim[1] - voxel_size/2, num_x_voxels)
+    y_voxels = np.linspace(ylim[0] + voxel_size/2, ylim[1] - voxel_size/2, num_y_voxels)
+    z_voxels = np.linspace(zlim[0] + voxel_size/2, zlim[1] - voxel_size/2, num_z_voxels)
+    
+    # Create voxel grid
+    x, y, z = np.meshgrid(x_voxels, y_voxels, z_voxels, indexing='ij')
+    
+    voxels = np.stack([x.flatten(), y.flatten(), z.flatten()], axis=1)
+    print(voxels)
+    
+    return voxels, voxel_size
 
 
 '''
@@ -162,7 +190,7 @@ if __name__ == '__main__':
 
     # This part is simply to test forming the initial voxel grid
     voxels, voxel_size = form_initial_voxels(xlim, ylim, zlim, 4000)
-    plot_surface(voxels)
+    # plot_surface(voxels)
     voxels, voxel_size = form_initial_voxels(xlim, ylim, zlim, num_voxels)
 
     # Test the initial carving
