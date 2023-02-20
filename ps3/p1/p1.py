@@ -55,20 +55,23 @@ def form_initial_voxels(xlim, ylim, zlim, num_voxels):
     voxel_size = np.cbrt(vox_vol)
     
     # Get number of voxels for each dimension in 3D
-    num_x_voxels = int(np.round(x_len / voxel_size))
-    num_y_voxels = int(np.round(y_len / voxel_size))
-    num_z_voxels = int(np.round(z_len / voxel_size))
+    num_x_voxels = int(np.ceil(x_len / voxel_size))
+    num_y_voxels = int(np.ceil(y_len / voxel_size))
+    num_z_voxels = int(np.ceil(z_len / voxel_size))
     
     # Evenly space voxels in each dimension
-    x_voxels = np.linspace(xlim[0] + voxel_size/2, xlim[1] - voxel_size/2, num_x_voxels)
-    y_voxels = np.linspace(ylim[0] + voxel_size/2, ylim[1] - voxel_size/2, num_y_voxels)
-    z_voxels = np.linspace(zlim[0] + voxel_size/2, zlim[1] - voxel_size/2, num_z_voxels)
+    x_voxels = np.arange(xlim[0], xlim[1], voxel_size, dtype=np.float64)
+    y_voxels = np.arange(ylim[0], ylim[1], voxel_size, dtype=np.float64)
+    z_voxels = np.arange(zlim[0], zlim[1], voxel_size, dtype=np.float64)
     
     # Create voxel grid
-    x, y, z = np.meshgrid(x_voxels, y_voxels, z_voxels, indexing='ij')
-    
-    voxels = np.stack([x.flatten(), y.flatten(), z.flatten()], axis=1)
-    print(voxels)
+    voxels = []
+    for x in x_voxels:
+        for y in y_voxels:
+            for z in z_voxels:
+                voxels.append([x,y,z])
+                
+    voxels = np.array(voxels, dtype=np.float64)
     
     return voxels, voxel_size
 
@@ -119,8 +122,18 @@ def get_voxel_bounds(cameras, estimate_better_bounds = False, num_voxels = 4000)
     ylim = ylim + diff(ylim) / 4 * np.array([1, -1])
 
     if estimate_better_bounds:
-        # TODO: Implement this method!
-        raise Exception('Not Implemented Error')
+        voxels, voxel_size = form_initial_voxels(xlim, ylim, zlim, num_voxels)
+        for camera in cameras:
+            voxels = carve(voxels, camera)
+
+        xlim = [voxels[:,0].min()-voxel_size, voxels[:,0].max()+voxel_size]
+        ylim = [voxels[:,1].min()-voxel_size, voxels[:,1].max()+voxel_size]
+        zlim = [voxels[:,2].min()-voxel_size, voxels[:,2].max()+voxel_size]
+
+    xlim = np.array(xlim, dtype=np.float64)
+    ylim = np.array(ylim, dtype=np.float64)
+    zlim = np.array(zlim, dtype=np.float64)
+    
     return xlim, ylim, zlim
     
 
@@ -140,8 +153,27 @@ Returns:
     voxels - a subset of the argument passed that are inside the silhouette
 '''
 def carve(voxels, camera):
-    # TODO: Implement this method!
-    raise Exception('Not Implemented Error')
+    
+    carved_voxels = []
+    
+    for voxel in voxels:
+        # Convert to homogeneous and get the 2D projection
+        voxel_homogen = np.append(voxel, 1.0)
+        voxel_2d = np.dot(camera.P, voxel_homogen)
+        
+        # Convert back to eucledian
+        voxel_2d_eucl = (voxel_2d / voxel_2d[-1])[:2]
+        voxel_2d_eucl = np.array(voxel_2d_eucl, dtype=np.int32)
+        
+        # Check if points are in silhouette
+        if (voxel_2d_eucl[0] >= 0) and (voxel_2d_eucl[0] < camera.silhouette.shape[1]) and (voxel_2d_eucl[1] >= 0) \
+            and (voxel_2d_eucl[1] < camera.silhouette.shape[0]) and \
+            (camera.silhouette[voxel_2d_eucl[1],voxel_2d_eucl[0]] > 0):
+                carved_voxels.append(voxel)
+        
+    carved_voxels = np.array(carved_voxels, dtype=np.float64)
+    
+    return carved_voxels 
 
 
 '''
