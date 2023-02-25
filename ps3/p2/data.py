@@ -31,8 +31,7 @@ class MNISTDatasetWrapper(Dataset):
         self.rot_choices = [0, 45, 90, 135, 180, 225, 270, 315]
 
     def __len__(self):
-        # TODO: Implement this function.
-        return None
+        return len(self.dataset)
 
     def __getitem__(self, idx):
         """
@@ -47,8 +46,8 @@ class MNISTDatasetWrapper(Dataset):
             return self.normalize(img), label
         else:
             img = self.tensorToImage(img)
-            label = None # TODO choose a label for rotation
-            img = None # TODO use PIL's rotate function to modify the image according to the label 
+            label = random.randint(0, 7)
+            img = torchvision.transforms.functional.rotate(img, self.rot_choices[label])
             img = self.normalize(self.imageToTensor(img))
             return img, torch.tensor(label).long()
 

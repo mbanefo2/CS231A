@@ -19,11 +19,17 @@ class ImageEmbedNet(nn.Module):
     def __init__(self):
         super(ImageEmbedNet, self).__init__()
         self.model = nn.Sequential(
-             # TODO implement model here with layers from torch.nn
+            nn.Conv2d(in_channels=1, out_channels=16, kernel_size=5, stride=1, padding=2),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(in_channels=16, out_channels=32, kernel_size=5, stride=1, padding=2),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Flatten()
         )
 
     def forward(self, image):
-        return None #TODO revise to call model on the given image
+        return self.model(image)
 
 class ClassifyNet(nn.Module):
     """
@@ -40,11 +46,15 @@ class ClassifyNet(nn.Module):
                        hidden_layer_size=25):
         super(ClassifyNet, self).__init__()
         self.model = nn.Sequential(
-             # TODO implement model here with layers from torch.nn
+            nn.Linear(in_features=input_size, out_features=hidden_layer_size),
+            nn.ReLU(),
+            nn.Linear(in_features=hidden_layer_size, out_features=hidden_layer_size),
+            nn.ReLU(),
+            nn.Linear(in_features=hidden_layer_size, out_features=output_size)
         )
 
     def forward(self, image_features):
-        return None #TODO revise to call model on the given image_features
+        return self.model(image_features)
 
 class ImageClassifyModel(object):
     """
@@ -61,7 +71,10 @@ class ImageClassifyModel(object):
         image_classify_net, otherwise have it be a list of the parameters of
         both image_embed_net and image_classify_net
         '''
+        if exclude_embed_params:
+            self.parameters = list(self.image_classify_net.parameters())
+        else:
+            self.parameters = list(self.image_embed_net.parameters()) + list(self.image_classify_net.parameters())
       
     def classify(self, image):
-      # TODO revise to return output of image_classify_net
-      return None
+        return self.image_classify_net(self.image_embed_net(image))

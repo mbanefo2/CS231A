@@ -89,6 +89,11 @@ class DenseDepth(nn.Module):
         super(DenseDepth, self).__init__()
 
         # TODO initialize encoder and decoder here
+        self.encoder = Encoder(encoder_pretrained=encoder_pretrained)
+        self.decoder = Decoder()
     
     def forward(self, x):
-        return None # TODO pass x through encoder and decoder and return result
+        # TODO pass x through encoder and decoder and return result
+        encoder_out = self.encoder(x)
+        decoder_out = self.decoder(encoder_out)
+        return decoder_out

@@ -107,9 +107,9 @@ def depth_loss(y_true, y_pred, theta=0.1, device="cuda"):
     """
     
     # Edges 
-    dy_true, dx_true = None # TODO get the images gradients of the true data 
-    dy_pred, dx_pred = None # TODO get the images gradients of the predicted data 
-    l_edges = None # TODO use torch to calculate the mean absolute difference between the true and predicted gradients
+    dy_true, dx_true = image_gradients(y_true, device) # TODO get the images gradients of the true data 
+    dy_pred, dx_pred = image_gradients(y_pred, device) # TODO get the images gradients of the predicted data 
+    l_edges = torch.mean(torch.abs(dy_pred-dy_true) + torch.abs(dx_pred-dx_true), dim=1)  # TODO use torch to calculate the mean absolute difference between the true and predicted gradients
     # with the following logic: mean(abs(dy_pref-dy_true) + abs(dx_pred-dx_true)) ; take the mean along dimension 1
 
     return l_edges
