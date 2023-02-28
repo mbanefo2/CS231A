@@ -41,8 +41,34 @@ side-length. The final "voxels" output should be a ndarray where every row is
 the location of a voxel in 3D space.
 '''
 def form_initial_voxels(xlim, ylim, zlim, num_voxels):
-    # TODO: Implement this method!
-    raise Exception('Not Implemented Error')
+    
+    # Compute the lengths of the voxel grid
+    x_len = xlim[1] - xlim[0]
+    y_len = ylim[1] - ylim[0]
+    z_len = zlim[1] - zlim[0]
+
+    # Volume of each voxel
+    grid_vol = x_len * y_len * z_len
+    vox_vol = grid_vol / num_voxels
+    
+    # Length of each voxel
+    voxel_size = np.cbrt(vox_vol)
+    
+    # Evenly space voxels in each dimension
+    x_voxels = np.arange(xlim[0], xlim[1], voxel_size, dtype=np.float64)
+    y_voxels = np.arange(ylim[0], ylim[1], voxel_size, dtype=np.float64)
+    z_voxels = np.arange(zlim[0], zlim[1], voxel_size, dtype=np.float64)
+    
+    # Create voxel grid
+    voxels = []
+    for x in x_voxels:
+        for y in y_voxels:
+            for z in z_voxels:
+                voxels.append([x,y,z])
+                
+    voxels = np.array(voxels, dtype=np.float64)
+    
+    return voxels, voxel_size
 
 
 '''
@@ -75,9 +101,9 @@ a buffer of one voxel_size around the carved object.
 '''
 def get_voxel_bounds(cameras, estimate_better_bounds = False, num_voxels = 4000):
     camera_positions = np.vstack([c.T for c in cameras])
-    xlim = [camera_positions[:,0].min(), camera_positions[:,0].max()]
-    ylim = [camera_positions[:,1].min(), camera_positions[:,1].max()]
-    zlim = [camera_positions[:,2].min(), camera_positions[:,2].max()]
+    xlim = np.array([np.min(camera_positions[:, 0]), np.max(camera_positions[:, 0])])
+    ylim = np.array([np.min(camera_positions[:, 1]), np.max(camera_positions[:, 1])])
+    zlim = np.array([np.min(camera_positions[:, 2]), np.max(camera_positions[:, 2])])
 
     # For the zlim we need to see where each camera is looking. 
     camera_range = 0.6 * np.sqrt(diff( xlim )**2 + diff( ylim )**2)
@@ -87,15 +113,27 @@ def get_voxel_bounds(cameras, estimate_better_bounds = False, num_voxels = 4000)
         zlim[1] = max( zlim[1], viewpoint[2] )
 
     # Move the limits in a bit since the object must be inside the circle
-    xlim = xlim + diff(xlim) / 4 * np.array([1, -1])
-    ylim = ylim + diff(ylim) / 4 * np.array([1, -1])
+    dx, dy = diff(xlim), diff(ylim)
+    xlim += dx / 4 * np.array([1, -1])
+    ylim += dy / 4 * np.array([1, -1])
 
     if estimate_better_bounds:
-        # TODO: Implement this method!
-        raise Exception('Not Implemented Error')
+        voxels, voxel_size = form_initial_voxels(xlim, ylim, zlim, num_voxels)
+        for c in cameras:
+            voxels = carve(voxels, c)
+
+        xlim, ylim, zlim = voxel_bounds(voxels, voxel_size)
+
+    xlim, ylim, zlim = np.array(xlim, dtype=np.float64), np.array(ylim, dtype=np.float64), np.array(zlim, dtype=np.float64)
+ 
     return xlim, ylim, zlim
     
+def voxel_bounds(voxels, voxel_size):
+    xlim = [voxels[:,0].min()-voxel_size, voxels[:,0].max()+voxel_size]
+    ylim = [voxels[:,1].min()-voxel_size, voxels[:,1].max()+voxel_size]
+    zlim = [voxels[:,2].min()-voxel_size, voxels[:,2].max()+voxel_size]
 
+    return xlim, ylim, zlim
 '''
 CARVE: carves away voxels that are not inside the silhouette contained in 
     the view of the camera. The resulting voxel array is returned.
@@ -112,8 +150,27 @@ Returns:
     voxels - a subset of the argument passed that are inside the silhouette
 '''
 def carve(voxels, camera):
-    # TODO: Implement this method!
-    raise Exception('Not Implemented Error')
+    
+    carved_voxels = []
+    
+    for voxel in voxels:
+        # Convert to homogeneous and get the 2D projection
+        voxel_homogen = np.append(voxel, 1.0)
+        voxel_2d = np.dot(camera.P, voxel_homogen)
+        
+        # Convert back to eucledian
+        voxel_2d_eucl = (voxel_2d / voxel_2d[-1])[:2]
+        voxel_2d_eucl = np.array(voxel_2d_eucl, dtype=np.int32)
+        
+        # Check if points are in silhouette
+        if (voxel_2d_eucl[0] >= 0) and (voxel_2d_eucl[0] < camera.silhouette.shape[1]) and (voxel_2d_eucl[1] >= 0) \
+            and (voxel_2d_eucl[1] < camera.silhouette.shape[0]) and \
+            (camera.silhouette[voxel_2d_eucl[1],voxel_2d_eucl[0]] > 0):
+                carved_voxels.append(voxel)
+        
+    carved_voxels = np.array(carved_voxels, dtype=np.float64)
+    
+    return carved_voxels 
 
 
 '''
@@ -134,8 +191,8 @@ def estimate_silhouette(im):
 
 
 if __name__ == '__main__':
-    estimate_better_bounds = False
-    use_true_silhouette = True
+    estimate_better_bounds = True
+    use_true_silhouette = False
     frames = sio.loadmat('frames.mat')['frames'][0]
     cameras = [Camera(x) for x in frames]
 
@@ -162,7 +219,7 @@ if __name__ == '__main__':
 
     # This part is simply to test forming the initial voxel grid
     voxels, voxel_size = form_initial_voxels(xlim, ylim, zlim, 4000)
-    plot_surface(voxels)
+    # plot_surface(voxels)
     voxels, voxel_size = form_initial_voxels(xlim, ylim, zlim, num_voxels)
 
     # Test the initial carving

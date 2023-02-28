@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 def test(dataset, model, batch_size):
     # TODO initialize a DataLoader on the dataset with the appropriate batch
     # size and shuffling enabled.
-    data_loader = None
+    data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     correct_count = 0
     for images, labels in data_loader:
@@ -16,10 +16,11 @@ def test(dataset, model, batch_size):
         _, predictions = torch.max(output, 1)
 
         # TODO calculate the number of correctly classified inputs.
-        num_correct = 0
+        labels_cuda = labels.cuda()
+        num_correct = sum(predictions == labels_cuda)
 
         correct_count+=num_correct
 
     # TODO calculate the float accuracy for the whole dataset.
-    accuracy = None
+    accuracy = correct_count / len(dataset)
     print("Testing Accuracy: %.3f"%(accuracy))

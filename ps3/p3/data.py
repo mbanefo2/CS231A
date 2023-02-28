@@ -104,10 +104,11 @@ class DepthDatasetMemory(Dataset):
             self.samples.append(sample)
 
     def __getitem__(self, idx):
-        return None # TODO 
+        return self.samples[idx]
 
     def __len__(self):
-        return None # TODO 
+        # return len(self.data)
+        return len(self.samples)
 
 def get_data_loaders(path, 
                     is_mono=True, 
@@ -125,13 +126,16 @@ def get_data_loaders(path,
         pct_dataset (float): percent of dataset to use 
     """
     data = load_zip_to_mem(path)
-    train_start_idx = None # TODO
-    train_end_idx = None # TODO 
-    test_start_idx = None # TODO 
-    test_end_idx = None # TODO 
+    n_samples = int(pct_dataset * len(data))
 
-    training_dataset = None # TODO 
-    testing_dataset = None # TODO 
+    train_start_idx = 0 # TODO
+    train_end_idx = int(n_samples * train_test_split) # TODO 
+    test_start_idx = train_end_idx # TODO 
+    test_end_idx = n_samples # TODO 
+
+    training_dataset = DepthDatasetMemory(data, is_mono=is_mono, start_idx=train_start_idx, end_idx=train_end_idx) # TODO 
+    testing_dataset = DepthDatasetMemory(data, is_mono=is_mono, start_idx=test_start_idx, end_idx=test_end_idx) # TODO 
+
 
     return (DataLoader(training_dataset, batch_size, shuffle=True, pin_memory=True),
             DataLoader(testing_dataset, batch_size, shuffle=False, pin_memory=True))

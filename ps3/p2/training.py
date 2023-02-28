@@ -13,14 +13,16 @@ def train(dataset, model, batch_size, epochs):
     """
     # TODO initialize a DataLoader on the dataset with the appropriate batch
     # size and shuffling enabled.
-    data_loader = None
+    data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     # TODO initialize this to be a Cross Entropy Classification loss.
-    criterion = None
+    criterion = nn.CrossEntropyLoss()
 
     # TODO initialize this to be an Stochastic gradient descent optimizer with
     # learning rate set to 0.001 and momentum set to 0.9.
-    optimizer = None
+    # print(type(model.parameters()))
+    # print(model.parameters())
+    optimizer = optim.SGD(model.parameters, lr=0.001, momentum=0.9)
 
     losses = []
     accuracies = []
@@ -34,16 +36,16 @@ def train(dataset, model, batch_size, epochs):
             labels_cuda = labels.cuda()
 
             # TODO call the model's classify method with images_cuda.
-            output = None
+            output = model.classify(images_cuda)
 
             # TODO call the criterion with the oupur and labels_cuda.
-            loss = None
+            loss = criterion(output, labels_cuda)
 
             # Calculate accuracy
             _, predictions = torch.max(output, 1)
 
             # TODO calculate the number of correctly classified inputs.
-            num_correct = 0
+            num_correct = sum(predictions == labels_cuda)
 
             correct_count += num_correct
 
@@ -52,18 +54,18 @@ def train(dataset, model, batch_size, epochs):
                 # optimization step.
 
                 # Get model weight updates by backpropagating the loss with backward()
-                # TODO
+                loss.backward()
 
                 # Apply the weight updates with the optimizer with step()
-                # TODO
+                optimizer.step()
 
             running_loss += loss.item()
 
         # TODO calculate the average loss in this epoch.
-        epoch_loss = None
+        epoch_loss = running_loss / len(data_loader)
 
         # TODO calculate the float accuracy of this epoch.
-        accuracy = None
+        accuracy = correct_count / len(dataset)
 
         losses.append(epoch_loss)
         accuracies.append(accuracy)
