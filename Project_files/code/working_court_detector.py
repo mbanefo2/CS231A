@@ -91,7 +91,3 @@ cv2.destroyAllWindows()
 
 # This code can be used as a starting point for similar image processing tasks, where a specific object or feature needs to be detected in an image.
 
- 
-
-# Since the images are not so clear, only one of the corner got detected in the output. Hope this helps to modify the code accordingly. Thank you and have a great day
-
